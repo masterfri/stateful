@@ -66,7 +66,7 @@ public function createStateMachine()
 }
 ```
 
-There is a simple example:
+Here is a simple example:
 
 ```
 use Masterfri\Stateful\Contracts\Stateful;
