@@ -36,7 +36,37 @@ can be bound to the same signal, as well as one event can trigger different sign
 
 ## Defining of stateful entity
 
-Stateful must implement interface `Masterfri\Stateful\Contracts\Stateful`. You can find a simple example below:
+Stateful must implement interface `Masterfri\Stateful\Contracts\Stateful`. Trait 
+`Masterfri\Stateful\Traits\StatefulTrait` contains all necessary methods to control your entity,
+you only have to implement method `createStateMachine()` when your state machine is defined.
+
+```
+public function createStateMachine()
+{
+  return FSM::build([
+    'states' => [ // list of states 
+      'state1', // state can be defined without options
+      'state2' => [ // or with options
+        'initial' => true, // optional, defines that state is initial, there must be exactly one initial state
+        'enter' => function($entity) {}, // optional, this function is executed when entity enters the state
+        'leave' => function($entity) {}, // optional, this function is executed when entity leaves the state
+        'finite' => true, // optional, defines that state is finite, there may be any amount of finite states
+      ],
+    ],
+    'transitions' => [ // list of transitions
+      [
+        'source', // source state name
+        'destination', // destination state name
+        'signal', // type of signal that can trigger this transition
+        'condition' => function($entity, $signal) {}, // optional, this finction is an additional condition that defines if transition has to be triggered
+        'transit' => function($entity) {}, // optional, this function is executed when entity goes through the transition 
+      ]
+    ],
+  ]);
+}
+```
+
+There is a simple example:
 
 ```
 use Masterfri\Stateful\Contracts\Stateful;
@@ -67,15 +97,15 @@ class Order extends Model implements Stateful
       ],
       'transitions' => [
         // Order is submitted by customer
-        ['new', 'placed', 'save'],
+        ['new', 'placed', 'submit'],
         // Manager processed the order
-        ['placed', 'processed', 'save',
+        ['placed', 'processed', 'process',
           'condition' => function($model) {
             return $model->canBeProcessed();
           }
         ],
         // Manager reviewed order and marked it as non-processable
-        ['placed', 'completed', 'save',
+        ['placed', 'completed', 'process',
           'condition' => function($model) {
             return !$model->canBeProcessed();
           },
@@ -85,17 +115,9 @@ class Order extends Model implements Stateful
           }
         ],
         // Manager received information from delivery service and filled out delivery information on the order
-        ['processed', 'shipped', 'save',
-          'condition' => function($model) {
-            return $model->deliveryCompleted();
-          }
-        ],
+        ['processed', 'shipped', 'ship'],
         // Manager received feedback from customer
-        ['shipped', 'completed', 'save',
-          'condition' => function($model) {
-            return $model->feedbackReceived();
-          }
-        ]
+        ['shipped', 'completed', 'close']
       ]);
   }
 ```
