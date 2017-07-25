@@ -4,6 +4,8 @@ namespace Masterfri\Stateful\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Masterfri\Stateful\EventMapping;
+use Masterfri\Stateful\Builder;
+use Illuminate\Support\Facades\App;
 
 class StatefulServiceProvider extends ServiceProvider
 {
@@ -19,5 +21,17 @@ class StatefulServiceProvider extends ServiceProvider
             $mapping = new EventMapping($event, $signal);
             $mapping->bind();
         }
+    }
+    
+    /**
+     * Register service
+     * 
+     * return void
+     */ 
+    public function register() 
+    {
+        App::bind('fsm', function() {
+            return new Builder();
+        });
     }
 }

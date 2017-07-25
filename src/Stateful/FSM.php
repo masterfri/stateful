@@ -3,7 +3,6 @@
 namespace Masterfri\Stateful;
 
 use Masterfri\Stateful\Contracts\Stateful;
-use Illuminate\Support\Arr;
 
 class FSM
 {
@@ -150,67 +149,13 @@ class FSM
     
     /**
      * Build state machine based on provided configuration
-     * Example:
-     * FSM::build([
-     *     'states' => [
-     *         'init' => ['initial' => true],
-     *         'state1' => ['enter' => function($entity) { ... }, 'leave' => function($entity) { ... }],
-     *         'state2',
-     *         'state3',
-     *         'end' => ['finite' => true, 'enter' => function($entity) { ... }],
-     *     ],
-     *     'transitions' => [
-     *          ['initial', 'state1', 'signal1'],
-     *          ['initial', 'state2', 'signal2'],
-     *          ['state1', 'state3', 'signal3', 'condition' => function($entity, $signal) { ... }],
-     *          ['state3', 'end', 'signal4', 'transit' => function($entity) { ... }],
-     *     ]
-     * ])
      * 
+     * @deprecated
      * @param array $config
      * @return Masterfri\Stateful\FSM
      */ 
     public static function build(array $config)
     {
-        $fsm = new static();
-        $states = Arr::get($config, 'states', []);
-        $transitions = Arr::get($config, 'transitions', []);
-        
-        foreach ($states as $name => $options) {
-            if (is_string($options)) {
-                $fsm->addState(new State($options));
-            } else {
-                if (Arr::get($options, 'initial', false)) {
-                    $state = new State($name, State::INITIAL);
-                } elseif (Arr::get($options, 'finite', false)) {
-                    $state = new State($name, State::FINITE);
-                } else {
-                    $state = new State($name);
-                }
-                $fsm->addState($state);
-                if ($fn = Arr::get($options, 'enter')) {
-                    $state->entering($fn);
-                }
-                if ($fn = Arr::get($options, 'leave')) {
-                    $state->leaving($fn);
-                }
-            }
-        }
-        
-        foreach ($transitions as $options) {
-            $from = array_shift($options);
-            $to = array_shift($options);
-            $signal = array_shift($options);
-            $transition = new Transition($from, $to, $signal);
-            $fsm->addTransition($transition);
-            if ($fn = Arr::get($options, 'transit')) {
-                $transition->transiting($fn);
-            }
-            if ($fn = Arr::get($options, 'condition')) {
-                $transition->condition($fn);
-            }
-        }
-        
-        return $fsm;
+        return Facades\FSM::create($config);
     }
 }
