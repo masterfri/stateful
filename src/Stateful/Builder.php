@@ -28,7 +28,7 @@ class Builder
      * @param array $config
      * @return Masterfri\Stateful\FSM
      */ 
-    public function create(array $config)
+    public function create(array $config = [])
     {
         $fsm = new FSM();
         $states = Arr::get($config, 'states', []);
@@ -117,5 +117,19 @@ class Builder
     public function createTransition($from, $to, $signal)
     {
         return new Transition($from, $to, $signal);
+    }
+    
+    /**
+     * Create event mapping
+     * 
+     * @param string $event
+     * @param string $signal
+     * @param array $params
+     * @return void
+     */ 
+    public function map($event, $signal, array $params = [])
+    {
+        $mapping = new EventMapping($event, $signal, $params);
+        $mapping->bind();
     }
 }

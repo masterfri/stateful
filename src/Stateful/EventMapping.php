@@ -20,17 +20,26 @@ class EventMapping
      * @var string
      */ 
     protected $signal;
+    
+    /**
+     * Signal params
+     * 
+     * @var array
+     */ 
+    protected $params;
 
     /**
      * Constructor
      * 
      * @param string $event
      * @param string $signal
+     * @param array $params
      */ 
-    public function __construct($event, $signal)
+    public function __construct($event, $signal, array $params = [])
     {
         $this->event = $event;
         $this->signal = $signal;
+        $this->params = $params;
     }
 
     /**
@@ -40,9 +49,9 @@ class EventMapping
      */ 
     public function bind()
     {
-        Event::listen($this->event, function($model) {
-            if ($model instanceof Stateful) {
-                $model->sendSignal($this->signal);
+        Event::listen($this->event, function($entity) {
+            if ($entity instanceof Stateful) {
+                $entity->sendSignal($this->signal, $this->params);
             }
         });
     }

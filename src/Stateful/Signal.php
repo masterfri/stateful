@@ -24,7 +24,7 @@ class Signal
      * @param string $type
      * @param mixed $args
      */ 
-    public function __construct($type, $args=[])
+    public function __construct($type, $args = [])
     {
         $this->type = $type;
         $this->args = collect($args);
@@ -48,5 +48,17 @@ class Signal
     public function getArguments()
     {
         return $this->args;
+    }
+    
+    /**
+     * Get additional argument
+     * 
+     * @param string $name
+     * @param mixed $default
+     * @return array
+     */ 
+    public function getArgument($name, $default = null)
+    {
+        return $this->args->get($name, $default);
     }
 }
